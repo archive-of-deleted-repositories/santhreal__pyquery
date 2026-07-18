@@ -822,6 +822,23 @@ class TestHTMLParser(TestCase):
         val = d.__html__()
         assert val == expected, (repr(val), repr(expected))
 
+    def test_orphan_before_after_replace_with(self):
+        orphan = pq('<div>x</div>')
+        self.assertRaises(ValueError, orphan.before, '<z/>')
+        self.assertRaises(ValueError, orphan.after, '<z/>')
+        self.assertRaises(ValueError, orphan.replace_with, '<z/>')
+        nested = pq('<div><p>x</p></div>')
+        nested('p').before('<z/>')
+        self.assertEqual(nested('z').text(), '')
+        self.assertEqual(nested('p').text(), 'x')
+        nested = pq('<div><p>x</p></div>')
+        nested('p').after('<z/>')
+        self.assertEqual(len(nested('z')), 1)
+        nested = pq('<div><p>x</p></div>')
+        nested('p').replace_with('<z/>')
+        self.assertEqual(nested.html(), '<z/>')
+        self.assertEqual(len(nested('p')), 0)
+
 
 class TestXMLNamespace(TestCase):
     xml = '''<?xml version="1.0" encoding="UTF-8" ?>

@@ -1277,12 +1277,15 @@ class PyQuery(list):
         """
         root, root_text = self._get_root(value)
         for i, tag in enumerate(self):
+            parent = tag.getparent()
+            if parent is None:
+                raise ValueError(
+                    'after can only be used with elements that have a parent')
             if not tag.tail:
                 tag.tail = ''
             tag.tail += root_text
             if i > 0:
                 root = deepcopy(list(root))
-            parent = tag.getparent()
             index = parent.index(tag) + 1
             parent[index:index] = root
             root = parent[index:len(root)]
@@ -1300,19 +1303,21 @@ class PyQuery(list):
         """
         root, root_text = self._get_root(value)
         for i, tag in enumerate(self):
+            parent = tag.getparent()
+            if parent is None:
+                raise ValueError(
+                    'before can only be used with elements that have a parent')
             previous = tag.getprevious()
             if previous is not None:
                 if not previous.tail:
                     previous.tail = ''
                 previous.tail += root_text
             else:
-                parent = tag.getparent()
                 if not parent.text:
                     parent.text = ''
                 parent.text += root_text
             if i > 0:
                 root = deepcopy(list(root))
-            parent = tag.getparent()
             index = parent.index(tag)
             parent[index:index] = root
             root = parent[index:len(root)]
@@ -1426,14 +1431,20 @@ class PyQuery(list):
             value = str(value)
         if hasattr(value, '__call__'):
             for i, element in enumerate(self):
+                parent = element.getparent()
+                if parent is None:
+                    raise ValueError(
+                        'replaceWith can only be used with elements that have a parent')
                 self._copy(element).before(
                     value(i, element) + (element.tail or ''))
-                parent = element.getparent()
                 parent.remove(element)
         else:
             for tag in self:
-                self._copy(tag).before(value + (tag.tail or ''))
                 parent = tag.getparent()
+                if parent is None:
+                    raise ValueError(
+                        'replaceWith can only be used with elements that have a parent')
+                self._copy(tag).before(value + (tag.tail or ''))
                 parent.remove(tag)
         return self
 
