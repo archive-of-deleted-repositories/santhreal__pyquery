@@ -188,6 +188,10 @@ class TestSelector(TestCase):
         self.assertEqual(e('div:gt(0)').text(), 'node2 node3')
         self.assertEqual(e('div:lt(1)').text(), 'node1')
         self.assertEqual(e('div:eq(2)').text(), 'node3')
+        self.assertEqual(e('div:eq(-1)').text(), 'node3')
+        self.assertEqual(e('div:eq(-2)').text(), 'node2')
+        self.assertEqual(e('div:gt(-2)').text(), 'node3')
+        self.assertEqual(e('div:lt(-1)').text(), 'node1 node2')
 
         # test on the form
         e = self.klass(self.html4)
