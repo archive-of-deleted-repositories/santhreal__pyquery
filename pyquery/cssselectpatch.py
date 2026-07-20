@@ -365,6 +365,14 @@ class JQueryTranslator(cssselect_xpath.HTMLTranslator):
         xpath.add_condition("not(node())")
         return xpath
 
+
+    @staticmethod
+    def _jquery_position_condition(op, value):
+        # jQuery allows negative indexes counted from the end.
+        if value < 0:
+            return 'position() %s last() - %s' % (op, abs(value) - 1)
+        return 'position() %s %s' % (op, value + 1)
+
     def xpath_eq_function(self, xpath, function):
         """Matches a single element by its index::
 
@@ -382,10 +390,7 @@ class JQueryTranslator(cssselect_xpath.HTMLTranslator):
                 "Expected a single integer for :eq(), got %r" % (
                     function.arguments,))
         value = int(function.arguments[0].value)
-        if value < 0:
-            xpath.add_post_condition('position() = last() - %s' % (abs(value) - 1))
-        else:
-            xpath.add_post_condition('position() = %s' % (value + 1))
+        xpath.add_post_condition(self._jquery_position_condition('=', value))
         return xpath
 
     def xpath_gt_function(self, xpath, function):
@@ -403,10 +408,7 @@ class JQueryTranslator(cssselect_xpath.HTMLTranslator):
                 "Expected a single integer for :gt(), got %r" % (
                     function.arguments,))
         value = int(function.arguments[0].value)
-        if value < 0:
-            xpath.add_post_condition('position() > last() - %s' % (abs(value) - 1))
-        else:
-            xpath.add_post_condition('position() > %s' % (value + 1))
+        xpath.add_post_condition(self._jquery_position_condition('>', value))
         return xpath
 
     def xpath_lt_function(self, xpath, function):
@@ -425,10 +427,7 @@ class JQueryTranslator(cssselect_xpath.HTMLTranslator):
                     function.arguments,))
 
         value = int(function.arguments[0].value)
-        if value < 0:
-            xpath.add_post_condition('position() < last() - %s' % (abs(value) - 1))
-        else:
-            xpath.add_post_condition('position() < %s' % (value + 1))
+        xpath.add_post_condition(self._jquery_position_condition('<', value))
         return xpath
 
     def xpath_contains_function(self, xpath, function):
