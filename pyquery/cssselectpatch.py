@@ -382,7 +382,10 @@ class JQueryTranslator(cssselect_xpath.HTMLTranslator):
                 "Expected a single integer for :eq(), got %r" % (
                     function.arguments,))
         value = int(function.arguments[0].value)
-        xpath.add_post_condition('position() = %s' % (value + 1))
+        if value < 0:
+            xpath.add_post_condition('position() = last() - %s' % (abs(value) - 1))
+        else:
+            xpath.add_post_condition('position() = %s' % (value + 1))
         return xpath
 
     def xpath_gt_function(self, xpath, function):
@@ -400,7 +403,10 @@ class JQueryTranslator(cssselect_xpath.HTMLTranslator):
                 "Expected a single integer for :gt(), got %r" % (
                     function.arguments,))
         value = int(function.arguments[0].value)
-        xpath.add_post_condition('position() > %s' % (value + 1))
+        if value < 0:
+            xpath.add_post_condition('position() > last() - %s' % (abs(value) - 1))
+        else:
+            xpath.add_post_condition('position() > %s' % (value + 1))
         return xpath
 
     def xpath_lt_function(self, xpath, function):
@@ -415,11 +421,14 @@ class JQueryTranslator(cssselect_xpath.HTMLTranslator):
         """
         if function.argument_types() != ['NUMBER']:
             raise ExpressionError(
-                "Expected a single integer for :gt(), got %r" % (
+                "Expected a single integer for :lt(), got %r" % (
                     function.arguments,))
 
         value = int(function.arguments[0].value)
-        xpath.add_post_condition('position() < %s' % (value + 1))
+        if value < 0:
+            xpath.add_post_condition('position() < last() - %s' % (abs(value) - 1))
+        else:
+            xpath.add_post_condition('position() < %s' % (value + 1))
         return xpath
 
     def xpath_contains_function(self, xpath, function):
